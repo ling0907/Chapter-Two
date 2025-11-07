@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完整动态数据可视化平台</title>
+    <!-- 注释：favicon路径不存在，如需要请先创建assets/images/icons/favicon.ico文件 -->
+    <!-- <link rel="icon" href="assets/images/icons/favicon.ico" type="image/x-icon"> -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="visualization-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>完整动态数据可视化平台</h1>
+            <p>支持11种图表类型的实时数据接入和动态更新</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="line-chart">折线图</div>
+            <div class="nav-tab" data-tab="bar-chart">柱状图</div>
+            <div class="nav-tab" data-tab="horizontal-bar-chart">水平柱状图</div>
+            <div class="nav-tab" data-tab="area-chart">堆积图</div>
+            <div class="nav-tab" data-tab="histogram-chart">直方图</div>
+            <div class="nav-tab" data-tab="pie-donut-chart">饼图/环形图</div>
+            <div class="nav-tab" data-tab="scatter-chart">散点图</div>
+            <div class="nav-tab" data-tab="error-chart">箱线图</div>
+            <div class="nav-tab" data-tab="radar-chart">雷达图</div>
+            <div class="nav-tab" data-tab="error-bar-chart">误差棒图</div>
+        </div>
+        
+        <div class="content">
+            <!-- 页面1: 折线图 -->
+            <div class="chart-page active" id="line-chart">
+                <div class="chart-container">
+                    <div class="chart-title">最高最低温度折线图</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('line-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('line-chart')">刷新数据</button>
+                    </div>
+                    <div id="line-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此折线图展示了4月到18日期间的最高温度和最低温度变化趋势。通过双线对比，可以清晰地观察到每日温差变化，帮助分析气温波动规律。您可以通过下方的数据接口输入新的温度数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/temperature-data</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "dates": ["4", "5", "6", "7"],
+  "maxTemps": [32, 33, 34, 34],
+  "minTemps": [19, 19, 20, 22]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="line-dates">日期 (用逗号分隔)</label>
+                            <input type="text" id="line-dates" placeholder="例如: 4,5,6,7">
+                        </div>
+                        <div class="input-group">
+                            <label for="line-max-temps">最高温度 (用逗号分隔)</label>
+                            <input type="text" id="line-max-temps" placeholder="例如: 32,33,34,34">
+                        </div>
+                        <div class="input-group">
+                            <label for="line-min-temps">最低温度 (用逗号分隔)</label>
+                            <input type="text" id="line-min-temps" placeholder="例如: 19,19,20,22">
+                        </div>
+                        <button class="submit-button" onclick="submitLineData()">提交数据</button>
+                        
+                        <div class="excel-upload">
+                            <div class="data-title">或导入Excel文件</div>
+                            <div class="input-group">
+                                <label for="line-excel-file">选择Excel文件</label>
+                                <input type="file" id="line-excel-file" accept=".xlsx,.xls" onchange="handleLineExcelFile(this)">
+                            </div>
+                            <div class="excel-format">
+                                <p>Excel文件格式要求：</p>
+                                <ul>
+                                    <li>第一列：日期</li>
+                                    <li>第二列：最高温度</li>
+                                    <li>第三列：最低温度</li>
+                                    <li>第一行为标题行（可选）</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面2: 柱状图 -->
+            <div class="chart-page" id="bar-chart">
+                <div class="chart-container">
+                    <div class="chart-title">淘宝天猫GMV柱形图</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('bar-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('bar-chart')">刷新数据</button>
+                    </div>
+                    <div id="bar-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此柱形图展示了淘宝天猫从2013财年到2019财年的GMV（商品交易总额）变化趋势。您可以通过下方的数据接口输入新的GMV数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/gmv-data</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "years": ["FY2013", "FY2014", "FY2015"],
+  "values": [10770, 16780, 24440]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="bar-years">财年 (用逗号分隔)</label>
+                            <input type="text" id="bar-years" placeholder="例如: FY2013,FY2014,FY2015">
+                        </div>
+                        <div class="input-group">
+                            <label for="bar-values">GMV值 (用逗号分隔)</label>
+                            <input type="text" id="bar-values" placeholder="例如: 10770,16780,24440">
+                        </div>
+                        <button class="submit-button" onclick="submitBarData()">提交数据</button>
+                        
+                        <div class="excel-upload">
+                            <div class="data-title">或导入Excel文件</div>
+                            <div class="input-group">
+                                <label for="bar-excel-file">选择Excel文件</label>
+                                <input type="file" id="bar-excel-file" accept=".xlsx,.xls" onchange="handleBarExcelFile(this)">
+                            </div>
+                            <div class="excel-format">
+                                <p>Excel文件格式要求：</p>
+                                <ul>
+                                    <li>第一列：年份（如FY2013）</li>
+                                    <li>第二列：GMV值</li>
+                                    <li>第一行为标题行（可选）</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面3: 水平柱状图 -->
+            <div class="chart-page" id="horizontal-bar-chart">
+                <div class="chart-container">
+                    <div class="chart-title">线上替代率条形图</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('horizontal-bar-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('horizontal-bar-chart')">刷新数据</button>
+                    </div>
+                    <div id="horizontal-bar-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此水平条形图展示了不同商品类别的线上替代率，即线上销售占该类别总销售的比例。您可以通过下方的数据接口输入新的替代率数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/online-replacement-rate</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "categories": ["家政、家教、保姆等生活服务", "飞机票、火车票"],
+  "rates": [0.959, 0.951]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="horizontal-categories">商品类别 (用逗号分隔)</label>
+                            <input type="text" id="horizontal-categories" placeholder="例如: 家政、家教、保姆等生活服务,飞机票、火车票">
+                        </div>
+                        <div class="input-group">
+                            <label for="horizontal-rates">替代率 (用逗号分隔)</label>
+                            <input type="text" id="horizontal-rates" placeholder="例如: 0.959,0.951">
+                        </div>
+                        <button class="submit-button" onclick="submitHorizontalBarData()">提交数据</button>
+                        
+                        <div class="excel-upload">
+                            <div class="data-title">或导入Excel文件</div>
+                            <div class="input-group">
+                                <label for="horizontal-bar-excel-file">选择Excel文件</label>
+                                <input type="file" id="horizontal-bar-excel-file" accept=".xlsx,.xls" onchange="handleHorizontalBarExcelFile(this)">
+                            </div>
+                            <div class="excel-format">
+                                <p>Excel文件格式要求：</p>
+                                <ul>
+                                    <li>第一列：类别名称</li>
+                                    <li>第二列：替代率值</li>
+                                    <li>第一行为标题行（可选）</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面4: 堆积图 -->
+            <div class="chart-page" id="area-chart">
+                <div class="chart-container">
+                    <div class="chart-title">物流成本统计堆积面积图</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('area-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('area-chart')">刷新数据</button>
+                    </div>
+                    <div id="area-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此堆积面积图展示了三家物流公司（公司A、公司B、公司C）在12个月内的物流成本变化情况。您可以通过下方的数据接口输入新的物流成本数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/logistics-cost</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "months": ["1", "2", "3"],
+  "companyA": [198, 215, 245],
+  "companyB": [203, 236, 200],
+  "companyC": [185, 205, 226]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="area-months">月份 (用逗号分隔)</label>
+                            <input type="text" id="area-months" placeholder="例如: 1,2,3">
+                        </div>
+                        <div class="input-group">
+                            <label for="area-company-a">公司A费用 (用逗号分隔)</label>
+                            <input type="text" id="area-company-a" placeholder="例如: 198,215,245">
+                        </div>
+                        <div class="input-group">
+                            <label for="area-company-b">公司B费用 (用逗号分隔)</label>
+                            <input type="text" id="area-company-b" placeholder="例如: 203,236,200">
+                        </div>
+                        <div class="input-group">
+                            <label for="area-company-c">公司C费用 (用逗号分隔)</label>
+                            <input type="text" id="area-company-c" placeholder="例如: 185,205,226">
+                        </div>
+                        <button class="submit-button" onclick="submitAreaData()">提交数据</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面5: 直方图 -->
+            <div class="chart-page" id="histogram-chart">
+                <div class="chart-container">
+                    <div class="chart-title">人脸识别直方图</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('histogram-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('histogram-chart')">刷新数据</button>
+                    </div>
+                    <div id="histogram-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此直方图展示了人脸识别算法在不同置信度区间内的识别结果分布。您可以通过下方的数据接口输入新的频次数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/face-recognition-distribution</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "ranges": ["0-10", "10-20", "20-30"],
+  "frequencies": [5, 12, 25]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="histogram-ranges">置信度区间 (用逗号分隔)</label>
+                            <input type="text" id="histogram-ranges" placeholder="例如: 0-10,10-20,20-30">
+                        </div>
+                        <div class="input-group">
+                            <label for="histogram-frequencies">频次 (用逗号分隔)</label>
+                            <input type="text" id="histogram-frequencies" placeholder="例如: 5,12,25">
+                        </div>
+                        <button class="submit-button" onclick="submitHistogramData()">提交数据</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面6: 饼图/环形图 -->
+            <div class="chart-page" id="pie-donut-chart">
+                <div class="chart-container">
+                    <div class="chart-switch-container">
+                        <button id="pie-switch-btn" class="chart-switch-button active" onclick="switchChartType('pie')">饼图</button>
+                        <button id="donut-switch-btn" class="chart-switch-button" onclick="switchChartType('donut')">环形图</button>
+                    </div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('pie-donut-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('pie-donut-chart')">刷新数据</button>
+                    </div>
+                    <div id="pie-donut-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description" id="pie-description">
+                    <h3>饼图介绍</h3>
+                    <p>此饼图展示了网站不同流量来源的占比情况。您可以通过下方的数据接口输入新的流量来源数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="chart-description" id="donut-description" style="display: none;">
+                    <h3>环形图介绍</h3>
+                    <p>此环形图展示了不同产品类别的销售额分布情况。您可以通过下方的数据接口输入新的销售额数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api" id="pie-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/traffic-sources</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "sources": [
+    {"name": "直接访问", "value": 335},
+    {"name": "邮件营销", "value": 310}
+  ]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-api" id="donut-api" style="display: none;">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/sales-distribution</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "categories": [
+    {"name": "电子产品", "value": 350},
+    {"name": "家居用品", "value": 250}
+  ]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section" id="pie-input">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="pie-sources">流量来源 (每行一个，格式: 名称,值)</label>
+                            <textarea id="pie-sources" placeholder="例如:
+直接访问,335
+邮件营销,310"></textarea>
+                        </div>
+                        <button class="submit-button" onclick="submitPieData()">提交数据</button>
+                    </div>
+                    
+                    <div class="data-input-section" id="donut-input" style="display: none;">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="donut-categories">产品类别 (每行一个，格式: 名称,值)</label>
+                            <textarea id="donut-categories" placeholder="例如:
+电子产品,350
+家居用品,250"></textarea>
+                        </div>
+                        <button class="submit-button" onclick="submitDonutData()">提交数据</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面8: 散点图 -->
+            <div class="chart-page" id="scatter-chart">
+                <div class="chart-container">
+                    <div class="chart-title">随机数据散点分布</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('scatter-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('scatter-chart')">刷新数据</button>
+                    </div>
+                    <div id="scatter-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此散点图展示了两个变量之间的相关性。您可以通过下方的数据接口输入新的数据点，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/scatter-data</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "data": [
+    {"x": 10, "y": 20},
+    {"x": 15, "y": 25}
+  ]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="scatter-data">数据点 (每行一个点，格式: x,y)</label>
+                            <textarea id="scatter-data" placeholder="例如:
+10,20
+15,25"></textarea>
+                        </div>
+                        <button class="submit-button" onclick="submitScatterData()">提交数据</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面9: 箱线图 -->
+            <div class="chart-page" id="error-chart">
+                <div class="chart-container">
+                    <div class="chart-title">发电量箱线图</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('error-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('error-chart')">刷新数据</button>
+                    </div>
+                    <div id="error-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此箱线图展示了2017年和2018年发电量的分布情况，包括最小值、第一四分位数、中位数、第三四分位数和最大值。您可以通过下方的数据接口输入新的数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/boxplot-data</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "data2017": [4605.2, 4710.3, 5168.9, 4767.2, 4947, 5203, 6047.4, 5945.5, 5219.6, 5038.1, 5196.3, 5698.6],
+  "data2018": [5200, 5254.5, 5283.4, 5107.8, 5443.3, 5550.6, 6400.2, 6404.9, 5483.1, 5330.2, 5543, 6199.9]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "箱形图数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="error-data-2017">2017年数据 (用逗号分隔)</label>
+                            <input type="text" id="error-data-2017" placeholder="例如: 4605.2,4710.3,5168.9,4767.2,4947,5203">
+                        </div>
+                        <div class="input-group">
+                            <label for="error-data-2018">2018年数据 (用逗号分隔)</label>
+                            <input type="text" id="error-data-2018" placeholder="例如: 5200,5254.5,5283.4,5107.8,5443.3,5550.6">
+                        </div>
+                        <button class="submit-button" onclick="submitErrorData()">提交数据</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面10: 雷达图 -->
+            <div class="chart-page" id="radar-chart">
+                <div class="chart-container">
+                    <div class="chart-title">霍兰德职业兴趣测试雷达图</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('radar-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('radar-chart')">刷新数据</button>
+                    </div>
+                    <div id="radar-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此雷达图展示了霍兰德职业兴趣测试的结果，包括个人兴趣和平均兴趣的对比。您可以通过下方的数据接口输入新的兴趣测试数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/holland-interest</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "personal": [85, 70, 60, 75, 80, 65],
+  "average": [65, 65, 65, 65, 65, 65]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="radar-personal">个人兴趣得分 (用逗号分隔，6个值)</label>
+                            <input type="text" id="radar-personal" placeholder="例如: 85,70,60,75,80,65">
+                        </div>
+                        <div class="input-group">
+                            <label for="radar-average">平均兴趣得分 (用逗号分隔，6个值)</label>
+                            <input type="text" id="radar-average" placeholder="例如: 65,65,65,65,65,65">
+                        </div>
+                        <button class="submit-button" onclick="submitRadarData()">提交数据</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 页面11: 误差棒图 -->
+            <div class="chart-page" id="error-bar-chart">
+                <div class="chart-container">
+                    <div class="chart-title">不同实验条件下的测量结果</div>
+                    <div class="chart-actions">
+                        <button class="action-button" onclick="exportChart('error-bar-chart')">导出图表</button>
+                        <button class="action-button" onclick="refreshChart('error-bar-chart')">刷新数据</button>
+                    </div>
+                    <div id="error-bar-chart-wrapper" class="chart-wrapper"></div>
+                </div>
+                
+                <div class="chart-description">
+                    <h3>图表介绍</h3>
+                    <p>此误差棒图展示了在不同实验条件下的测量结果及其误差范围。误差棒图可以直观地展示数据的中心趋势和离散程度，便于比较不同条件下的测量结果。您可以通过下方的数据接口输入新的实验数据，系统将自动更新图表。</p>
+                </div>
+                
+                <div class="data-section">
+                    <div class="data-title">数据接口</div>
+                    <div class="data-api">
+                        <div class="api-title">API端点</div>
+                        <div class="api-code">POST /api/experimental-data</div>
+                        <div class="api-title">请求参数</div>
+                        <div class="api-code">{
+  "categories": ["条件A", "条件B", "条件C"],
+  "values": [25.3, 32.7, 41.5],
+  "errors": [1.2, 2.1, 3.4]
+}</div>
+                        <div class="api-title">返回格式</div>
+                        <div class="api-code">{
+  "success": true,
+  "message": "数据已更新"
+}</div>
+                    </div>
+                    
+                    <div class="data-input-section">
+                        <div class="data-title">输入新数据</div>
+                        <div class="input-group">
+                            <label for="error-bar-categories">实验条件 (用逗号分隔)</label>
+                            <input type="text" id="error-bar-categories" placeholder="例如: 条件A,条件B,条件C">
+                        </div>
+                        <div class="input-group">
+                            <label for="error-bar-values">测量值 (用逗号分隔)</label>
+                            <input type="text" id="error-bar-values" placeholder="例如: 25.3,32.7,41.5">
+                        </div>
+                        <div class="input-group">
+                            <label for="error-bar-errors">误差值 (用逗号分隔)</label>
+                            <input type="text" id="error-bar-errors" placeholder="例如: 1.2,2.1,3.4">
+                        </div>
+                        <button class="submit-button" onclick="submitErrorBarData()">提交数据</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
