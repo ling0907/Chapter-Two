@@ -1,0 +1,77 @@
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 编辑器和IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 临时文件
+*.tmp
+*.temp
+
+# 依赖目录
+node_modules/
+bower_components/
+
+# 构建输出
+dist/
+build/
+out/
+
+# 缓存
+.cache/
+.npm/
+
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 备份文件
+*.bak
+*.backup
+
+# 测试覆盖率
+coverage/
+
+# Jupyter Notebook检查点
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 特定于项目的忽略文件
+*.local
+dev/
+prod/
+staging/
+
+# 部署相关
+ftp-deploy/
+deploy-temp/

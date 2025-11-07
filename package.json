@@ -1,0 +1,34 @@
+{
+  "name": "data-visualization-platform",
+  "version": "1.0.0",
+  "description": "一个功能完整的动态数据可视化平台，包含11种不同类型的图表，支持实时数据更新和Excel文件导入功能",
+  "main": "完整动态数据可视化平台.html",
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "serve": "npx serve -p 8080",
+    "deploy": "gh-pages -d .",
+    "build": "echo 'No build step required for this static project'"
+  },
+  "keywords": [
+    "data-visualization",
+    "charts",
+    "echarts",
+    "excel-import",
+    "interactive",
+    "dashboard"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/data-visualization-platform.git"
+  },
+  "homepage": "https://yourusername.github.io/data-visualization-platform",
+  "devDependencies": {
+    "serve": "^14.2.1",
+    "gh-pages": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
